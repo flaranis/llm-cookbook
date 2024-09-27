@@ -1,0 +1,54 @@
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  api_key="your-api-key",
+  base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"Error during API call: {e}")
+        return None
+
+def read_text_from_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return file.read()
+
+def summarize_multiple_texts(texts):
+    summaries = {}
+    for i, text in enumerate(texts):
+        summary = get_summary(text)
+        summaries[f"Text {i+1}"] = summary
+    return summaries
+
+# Test the functions
+# 读取文件中的文本
+file_path = "your_text_file.txt"  # 替换为你的文件路径
+sample_text = read_text_from_file(file_path)
+
+# 总结单个文本
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+# 示例：总结多个文本
+texts_to_summarize = [
+    "First long text here...",
+    "Second long text here...",
+    # 添加更多文本
+]
+
+summaries = summarize_multiple_texts(texts_to_summarize)
+for title, summary in summaries.items():
+    print(f"{title} Summary:", summary)
